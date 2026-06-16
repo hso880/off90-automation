@@ -88,7 +88,9 @@ def format_kakao_message(articles):
     lines = [f"⚽ OFF90 뉴스 브리핑 {today}\n"]
     for i, art in enumerate(articles, 1):
         lines.append(f"{i}. {art['title']}")
-    lines.append("\n콘텐츠로 만들 기사 번호를 답장해 주세요.")
+    lines.append("\n콘텐츠 만들 기사 번호를 답장해 주세요.")
+    lines.append("👇 OFF90봇에서 바로 승인")
+    lines.append("https://pf.kakao.com/_BsxgnX/chat")
     return "\n".join(lines)
 
 
