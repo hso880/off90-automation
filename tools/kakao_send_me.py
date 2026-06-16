@@ -40,8 +40,8 @@ def send_me(text: str):
         "object_type": "text",
         "text": text[:2000],  # 카카오 텍스트 메시지 최대 2000자
         "link": {
-            "web_url": "https://instagram.com/the.off90",
-            "mobile_web_url": "https://instagram.com/the.off90",
+            "web_url": "https://pf.kakao.com/_BsxgnX/chat",
+            "mobile_web_url": "https://pf.kakao.com/_BsxgnX/chat",
         },
     }
     resp = requests.post(
