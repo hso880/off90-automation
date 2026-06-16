@@ -2,7 +2,7 @@ name: Daily News Briefing
 
 on:
   schedule:
-    - cron: '0 0 * * *'   # 매일 오전 9시 KST (UTC 0시)
+    - cron: '0 23 * * *'   # 매일 오전 8시 KST
   workflow_dispatch:        # 수동 실행
 
 jobs:
@@ -16,7 +16,7 @@ jobs:
           python-version: '3.11'
 
       - name: 패키지 설치
-        run: pip install requests
+        run: pip install requests deep-translator
 
       - name: 뉴스 수집 및 카카오 알림
         env:
