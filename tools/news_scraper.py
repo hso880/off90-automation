@@ -4,8 +4,8 @@
 """
 import re
 import xml.etree.ElementTree as ET
-import urllib.request
 import urllib.parse
+import requests
 from datetime import datetime
 
 
@@ -31,12 +31,14 @@ SKIP_KEYWORDS = ["광고", "이벤트", "경품", "무료 관람"]
 def _parse_rss(url, max_items=5):
     articles = []
     try:
-        req = urllib.request.Request(
+        # URL 한글 쿼리 인코딩 (requests가 자동 처리)
+        resp = requests.get(
             url,
             headers={"User-Agent": "Mozilla/5.0 (compatible; OFF90Bot/1.0)"},
+            timeout=10,
         )
-        with urllib.request.urlopen(req, timeout=10) as resp:
-            xml_data = resp.read()
+        resp.raise_for_status()
+        xml_data = resp.content
         root = ET.fromstring(xml_data)
         channel = root.find("channel")
         if channel is None:
