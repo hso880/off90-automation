@@ -90,12 +90,38 @@ def _worldcup_priority(title):
 
 def _transfer_priority(title):
     t = title.lower()
-    if any(k in t for k in ["here we go", "official", "오피셜", "confirmed", "완료",
-                             "signs", "joins", "announces", "done deal", "agreement reached"]):
+
+    # 1순위: 오피셜 (확정/완료)
+    OFFICIAL = [
+        "here we go",
+        "official", "confirmed", "done deal", "deal done", "agreement reached",
+        "signs", "signed", "joins", "joined", "seals", "completes", "medical",
+        "passes medical", "undergoes medical", "announces", "unveiled", "set to join",
+        "오피셜", "이적 확정", "계약 완료", "서명 완료", "합류 확정", "영입 완료",
+    ]
+    if any(k in t for k in OFFICIAL):
         return 3
-    if any(k in t for k in ["romano", "ornstein", "ben jacobs", "fabrizio",
-                             "exclusive", "유력", "협상", "접촉", "관심", "접근"]):
+
+    # 2순위: 유력설 (공신력 기자 or 구체적 협상)
+    CREDIBLE = [
+        "romano", "fabrizio", "ornstein", "ben jacobs", "florian plettenberg",
+        "matteo moretto", "ekrem konur",
+        "exclusive", "in talks", "close to", "nearing", "bid", "offer",
+        "approach", "contact", "interested", "personal terms", "fee agreed", "pushing",
+        "유력", "협상", "접촉", "관심", "접근", "이적설", "영입 추진", "협의 중",
+    ]
+    if any(k in t for k in CREDIBLE):
         return 2
+
+    # "X to [Club]" 패턴 — 영어 이적 저널리즘의 확정/유력 표현
+    # e.g. "Amorim to AC Milan", "Mbappe to Real Madrid"
+    if re.search(r'[A-Z][a-z]+ to [A-Z]', title):
+        return 2
+
+    # 한국어 "X, Y로 이적/합류" 패턴
+    if re.search(r'[가-힣].{0,5}(으로|로)\s*(이적|합류|이동)', title):
+        return 2
+
     return 1
 
 
