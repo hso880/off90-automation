@@ -62,8 +62,53 @@ TRANSFER_FEEDS = [
 ]
 
 
+FOOTBALL_TERMS = {
+    "here we go": "히어 위 고 🔥",
+    "done deal": "딜 완료",
+    "deal done": "딜 완료",
+    "passes medical": "메디컬 통과",
+    "medical": "메디컬",
+    "personal terms": "개인 조건",
+    "fee agreed": "이적료 합의",
+    "in talks": "협상 중",
+    "close to": "합의 임박",
+    "nearing": "합의 임박",
+    "set to join": "합류 예정",
+    "loan deal": "임대 이적",
+    "free transfer": "자유 이적",
+    "exclusive": "단독",
+    "agreement reached": "합의 완료",
+    "signs": "서명",
+    "confirmed": "확정",
+}
+
+
+def _apply_football_terms(text):
+    """Romano 전용 용어 고정 번역 (기계번역 전에 교체)."""
+    for en, ko in FOOTBALL_TERMS.items():
+        text = re.sub(re.escape(en), ko, text, flags=re.IGNORECASE)
+    return text
+
+
+def _resolve_url(url, timeout=6):
+    """Google News 리다이렉트를 최종 URL로 풀어냄."""
+    if "news.google.com" not in url:
+        return url
+    try:
+        r = requests.head(
+            url,
+            allow_redirects=True,
+            timeout=timeout,
+            headers={"User-Agent": "Mozilla/5.0"},
+        )
+        return r.url if r.url.startswith("http") else url
+    except Exception:
+        return url
+
+
 def _shorten_url(url):
-    """TinyURL API로 링크 단축. 실패 시 도메인만 표시."""
+    """최종 URL 확정 후 TinyURL 단축. 실패 시 도메인만 표시."""
+    url = _resolve_url(url)
     try:
         r = requests.get(
             f"https://tinyurl.com/api-create.php?url={url}",
@@ -73,13 +118,16 @@ def _shorten_url(url):
             return r.text.strip()
     except Exception:
         pass
-    # 폴백: 도메인 + 말줄임
     match = re.search(r"https?://([^/]+)", url)
     domain = match.group(1) if match else "링크"
     return f"({domain})"
 
 
-def _translate(text):
+def _translate(text, is_ig_source=False):
+    """영문 번역. is_ig_source=True면 고정 용어만 교체하고 기계번역 스킵."""
+    text = _apply_football_terms(text)
+    if is_ig_source:
+        return text
     if not TRANSLATOR_AVAILABLE:
         return text
     try:
@@ -199,7 +247,8 @@ def _collect_instagram(cutoff_hours):
         )
         for post in raw_posts:
             if _is_english(post["title"]):
-                post["title_ko"] = _translate(post["title"])
+                # Instagram 소스는 기계번역 스킵 — 고정 용어만 교체
+                post["title_ko"] = _translate(post["title"], is_ig_source=True)
                 post["lang"] = "en"
             else:
                 post["title_ko"] = post["title"]
