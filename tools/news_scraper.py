@@ -17,8 +17,8 @@ except ImportError:
     TRANSLATOR_AVAILABLE = False
 
 MAX_PER_SECTION = 5
-WORLDCUP_CUTOFF_HOURS = 18   # 오전 8시 기준 전날 오후 2시 이후
-TRANSFER_CUTOFF_HOURS = 24   # 이적 뉴스는 하루 단위
+WORLDCUP_CUTOFF_HOURS = 24   # 오전 8시 기준 24시간 이내
+TRANSFER_CUTOFF_HOURS = 24   # 오전 8시 기준 24시간 이내
 SKIP_KEYWORDS = ["광고", "이벤트", "경품", "무료 관람", "티켓 할인"]
 
 # ── 월드컵 피드 ────────────────────────────────────────────────
