@@ -87,7 +87,7 @@ def _transfer_priority(title):
     return 1
 
 
-CUTOFF_HOURS = 24  # 24시간 이내 기사만 수집
+CUTOFF_HOURS = 18  # 오전 8시 기준 18시간 이내 기사만 수집
 
 
 def _within_cutoff(pub_str):
