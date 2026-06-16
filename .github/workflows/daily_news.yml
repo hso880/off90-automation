@@ -16,7 +16,7 @@ jobs:
           python-version: '3.11'
 
       - name: 패키지 설치
-        run: pip install requests deep-translator
+        run: pip install requests deep-translator instaloader
 
       - name: 뉴스 수집 및 카카오 알림
         env:
