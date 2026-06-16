@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 """
 OFF90 데일리 리포트 뉴스 수집
-- 월드컵: 경기결과 > 주목이슈 > 프리뷰 (18h 컷오프)
+- 월드컵: 경기결과 > 주목이슈 > 프리뷰 (24h 컷오프)
 - 이적시장: 오피셜 > 유력설 > 찌라시 (24h 컷오프), 영어 번역 포함
+  + Instagram 직접 스크래핑 (Romano 등) — Google News 우회
 """
+import itertools
 import re
 import xml.etree.ElementTree as ET
 import requests
@@ -16,6 +18,12 @@ try:
 except ImportError:
     TRANSLATOR_AVAILABLE = False
 
+try:
+    import instaloader
+    INSTALOADER_AVAILABLE = True
+except ImportError:
+    INSTALOADER_AVAILABLE = False
+
 MAX_PER_SECTION = 5
 WORLDCUP_CUTOFF_HOURS = 24   # 오전 8시 기준 24시간 이내
 TRANSFER_CUTOFF_HOURS = 24   # 오전 8시 기준 24시간 이내
@@ -27,6 +35,15 @@ WORLDCUP_FEEDS = [
     "https://news.google.com/rss/search?q=월드컵+조별리그+경기결과+2026&hl=ko&gl=KR&ceid=KR:ko",
     "https://news.google.com/rss/search?q=2026+월드컵+이변+이슈+충격&hl=ko&gl=KR&ceid=KR:ko",
     "https://news.google.com/rss/search?q=월드컵+2026+경기+전망+예정&hl=ko&gl=KR&ceid=KR:ko",
+]
+
+# ── Instagram 직접 소스 ────────────────────────────────────────
+# Google News가 못 잡는 실시간 SNS 포스트를 직접 수집
+# priority_min: 해당 계정 게시물의 최소 신뢰도 (2=유력설, 3=오피셜)
+INSTAGRAM_SOURCES = [
+    {"username": "fabrizioromano",   "priority_min": 2, "label": "IG @fabrizioromano"},
+    {"username": "david.ornstein",   "priority_min": 2, "label": "IG @david.ornstein"},
+    {"username": "brentderksen",     "priority_min": 2, "label": "IG @brentderksen"},
 ]
 
 # ── 이적시장 피드 (영문 + 국문) ───────────────────────────────
@@ -135,6 +152,65 @@ def _within_cutoff(pub_str, hours):
         return True
 
 
+def _scrape_instagram_account(username, cutoff_hours, priority_min=2):
+    """instaloader로 공개 계정 최근 포스트 수집 (로그인 불필요)."""
+    if not INSTALOADER_AVAILABLE:
+        return []
+    try:
+        L = instaloader.Instaloader(
+            download_pictures=False,
+            download_videos=False,
+            download_video_thumbnails=False,
+            download_geotags=False,
+            download_comments=False,
+            save_metadata=False,
+            quiet=True,
+        )
+        profile = instaloader.Profile.from_username(L.context, username)
+        cutoff = datetime.now(timezone.utc) - timedelta(hours=cutoff_hours)
+        posts = []
+        for post in itertools.islice(profile.get_posts(), 15):
+            if post.date_utc.replace(tzinfo=timezone.utc) < cutoff:
+                break
+            caption = (post.caption or "").strip()
+            if not caption:
+                continue
+            first_line = caption.split("\n")[0][:250]
+            posts.append({
+                "title": first_line,
+                "link": f"https://www.instagram.com/p/{post.shortcode}/",
+                "published": post.date_utc.strftime("%a, %d %b %Y %H:%M:%S +0000"),
+                "priority_min": priority_min,
+                "source_label": f"IG @{username}",
+            })
+        print(f"[Instagram] @{username}: {len(posts)}개 수집")
+        return posts
+    except Exception as e:
+        print(f"[Instagram 오류] @{username}: {e}")
+        return []
+
+
+def _collect_instagram(cutoff_hours):
+    """Instagram 직접 소스 전체 수집 후 우선순위 계산."""
+    items = []
+    for src in INSTAGRAM_SOURCES:
+        raw_posts = _scrape_instagram_account(
+            src["username"], cutoff_hours, src.get("priority_min", 2)
+        )
+        for post in raw_posts:
+            if _is_english(post["title"]):
+                post["title_ko"] = _translate(post["title"])
+                post["lang"] = "en"
+            else:
+                post["title_ko"] = post["title"]
+                post["lang"] = "ko"
+            keyword_priority = _transfer_priority(post["title"])
+            post["priority"] = max(keyword_priority, post.get("priority_min", 2))
+            post["short_link"] = _shorten_url(post["link"])
+            items.append(post)
+    return items
+
+
 def _parse_rss(url, max_items=10, cutoff_hours=24):
     articles = []
     try:
@@ -190,9 +266,26 @@ def _collect(feeds, priority_fn, cutoff_hours, max_per_feed=8):
 
 
 def scrape_news():
+    worldcup = _collect(WORLDCUP_FEEDS, _worldcup_priority, WORLDCUP_CUTOFF_HOURS)
+
+    # 이적시장: RSS + Instagram 직접 소스 병합
+    transfer_rss = _collect(TRANSFER_FEEDS, _transfer_priority, TRANSFER_CUTOFF_HOURS)
+    transfer_ig = _collect_instagram(TRANSFER_CUTOFF_HOURS)
+
+    # 중복 제거 (제목 기준), IG 우선 포함
+    seen = set()
+    transfer_merged = []
+    for art in transfer_ig + transfer_rss:
+        key = art["title"][:60]
+        if key not in seen:
+            seen.add(key)
+            transfer_merged.append(art)
+
+    transfer_merged.sort(key=lambda x: x["priority"], reverse=True)
+
     return {
-        "worldcup": _collect(WORLDCUP_FEEDS, _worldcup_priority, WORLDCUP_CUTOFF_HOURS),
-        "transfer": _collect(TRANSFER_FEEDS, _transfer_priority, TRANSFER_CUTOFF_HOURS),
+        "worldcup": worldcup,
+        "transfer": transfer_merged[:MAX_PER_SECTION],
     }
 
 
@@ -232,7 +325,9 @@ def format_kakao_message(news):
     if tr:
         for i, art in enumerate(tr, 1):
             label = _priority_label_tr(art.get("priority", 1))
-            lines.append(f"\n{i}. [{label}]")
+            source = art.get("source_label", "")
+            source_str = f" · {source}" if source else ""
+            lines.append(f"\n{i}. [{label}{source_str}]")
             lines.append(f"   {art['title_ko']}")
             if art.get("lang") == "en":
                 lines.append(f"   ({art['title']})")
