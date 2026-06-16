@@ -7,7 +7,8 @@ OFF90 데일리 리포트 뉴스 수집
 import re
 import xml.etree.ElementTree as ET
 import requests
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
+from email.utils import parsedate_to_datetime
 
 try:
     from deep_translator import GoogleTranslator
@@ -86,6 +87,21 @@ def _transfer_priority(title):
     return 1
 
 
+CUTOFF_HOURS = 24  # 24시간 이내 기사만 수집
+
+
+def _within_cutoff(pub_str):
+    """pubDate가 CUTOFF_HOURS 이내인지 확인. 날짜 파싱 실패 시 통과."""
+    if not pub_str:
+        return True
+    try:
+        pub_dt = parsedate_to_datetime(pub_str)
+        cutoff = datetime.now(timezone.utc) - timedelta(hours=CUTOFF_HOURS)
+        return pub_dt >= cutoff
+    except Exception:
+        return True
+
+
 def _parse_rss(url, max_items=10):
     articles = []
     try:
@@ -102,12 +118,15 @@ def _parse_rss(url, max_items=10):
         for item in channel.findall("item")[:max_items]:
             title = item.findtext("title", "").strip()
             link = item.findtext("link", "").strip()
+            pub = item.findtext("pubDate", "").strip()
             if not title or not link:
                 continue
+            if not _within_cutoff(pub):
+                continue  # 24시간 초과 기사 제외
             if any(kw in title for kw in SKIP_KEYWORDS):
                 continue
             clean = re.sub(r"\s*-\s*[^-]{1,40}$", "", title).strip()
-            articles.append({"title": clean, "link": link})
+            articles.append({"title": clean, "link": link, "published": pub})
     except Exception as e:
         print(f"[RSS 오류] {url[:60]}: {e}")
     return articles
