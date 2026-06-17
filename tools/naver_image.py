@@ -51,44 +51,43 @@ def slide1_queries(content_type: str, data: dict) -> list:
         pa = KEY_PLAYERS.get(ta, ta)
         pb = KEY_PLAYERS.get(tb, tb)
         return [
-            f"{pa} {pb} 2026 월드컵",          # 두 키플레이어
-            f"{pa} 2026 FIFA 월드컵 경기",      # 팀 A 키플레이어
-            f"{ta} {tb} 2026 월드컵 선수",      # 팀코드 기반 폴백
+            f"{pa} {pb} 2026 월드컵",
+            f"{pa} 2026 FIFA 월드컵 경기",
+            f"{ta} {tb} 2026 월드컵 선수",
         ]
     else:  # transfer
-        player = data.get("player", "")
-        club   = data.get("club", "")
+        player   = data.get("player", "")
+        to_club  = data.get("to_club", "")
+        from_club = data.get("from_club", "")
+        club = to_club or from_club
         return [
-            f"{player} 2026 축구",
-            f"{player} {club} 이적",
-            f"{player} 프리미어리그",
+            f"{player} {club} 2026" if club else f"{player} 2026 축구",
+            f"{player} 이적 2026 축구",
+            f"{player} 축구 선수",
         ]
 
 
 def slide2_query(content_type: str, data: dict) -> str:
-    """슬라이드 2용 쿼리 (View01 내용 기반)"""
-    view_title = data.get("view01_title", "")
+    """슬라이드 2용 쿼리 (View01 — 이적 현황 또는 경기 흐름)"""
     if content_type == "worldcup":
         ta = data.get("team_a", "")
         pa = KEY_PLAYERS.get(ta, ta)
+        view_title = data.get("view01_title", "")
         return f"{pa} 2026 월드컵 {view_title[:12]}"
     else:
-        player = data.get("player", "")
-        return f"{player} {view_title[:15]}"
+        player    = data.get("player", "")
+        from_club = data.get("from_club", "")
+        return f"{player} {from_club} 2026" if from_club else f"{player} 이적 2026"
 
 
 def slide3_query(content_type: str, data: dict) -> str:
-    """슬라이드 3용 쿼리 (View02 내용 기반)"""
-    view_title = data.get("view02_title", "")
+    """슬라이드 3용 쿼리 (View02 — 핵심 포인트 또는 다음 행방)"""
     if content_type == "worldcup":
         tb = data.get("team_b", "")
         pb = KEY_PLAYERS.get(tb, tb)
+        view_title = data.get("view02_title", "")
         return f"{pb} 2026 월드컵 {view_title[:12]}"
     else:
-        player = data.get("player", "")
-        return f"{player} {view_title[:15]}"
-
-
-# 하위 호환: build_query는 기존 코드와의 호환을 위해 유지
-def build_query(content_type: str, data: dict) -> str:
-    return slide1_queries(content_type, data)[0]
+        player  = data.get("player", "")
+        to_club = data.get("to_club", "")
+        return f"{player} {to_club} 2026" if to_club else f"{player} 이적시장 2026"
