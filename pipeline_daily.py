@@ -7,7 +7,7 @@ import re, sys, os
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from tools.news_scraper import scrape_news
-from tools.naver_image import search_images, build_query
+from tools.naver_image import search_images, slide1_queries, slide2_query, slide3_query
 from tools.discord_bot import send_message, send_photo_options
 import tools.state_manager as sm
 
@@ -100,29 +100,39 @@ def main():
     title = story.get("title_ko") or story.get("title", "")
     print(f"\n선택: [{content_type}] {title}")
 
-    # 이미지 검색 쿼리 구성
-    data = {}
+    # extract 함수로 완성된 data 딕셔너리 생성 (view01_title, view02_title 포함)
+    from tools.carousel_builder import extract_worldcup_data, extract_transfer_data
     if content_type == "worldcup":
-        for name, code in [
-            ("브라질","BRA"),("모로코","MAR"),("프랑스","FRA"),("독일","GER"),
-            ("스페인","ESP"),("아르헨티나","ARG"),("잉글랜드","ENG"),("포르투갈","POR"),
-            ("일본","JPN"),("한국","KOR"),("대한민국","KOR"),("미국","USA"),
-            ("멕시코","MEX"),("네덜란드","NED"),("이탈리아","ITA"),
-        ]:
-            if name in title:
-                if not data.get("team_a"):
-                    data["team_a"] = code
-                elif not data.get("team_b"):
-                    data["team_b"] = code
+        data = extract_worldcup_data(title, story.get("published", ""))
     else:
-        words = title.split()
-        data["player"] = " ".join(words[:2]) if words else title
+        data = extract_transfer_data(title, story.get("priority", 1))
 
-    query = build_query(content_type, data)
-    print(f"이미지 검색: {query}")
-    image_urls = search_images(query, count=3)
+    # 슬라이드 1: 3개 옵션 (사용자 선택)
+    q1_list = slide1_queries(content_type, data)
+    image_options = []
+    for q in q1_list:
+        print(f"슬라이드1 이미지 검색: {q}")
+        imgs = search_images(q, count=1)
+        if imgs:
+            image_options.append(imgs[0])
+        if len(image_options) >= 3:
+            break
+    # 부족하면 첫 쿼리로 채우기
+    if len(image_options) < 3:
+        fallback = search_images(q1_list[0], count=3)
+        image_options = (image_options + fallback)[:3]
 
-    if not image_urls:
+    # 슬라이드 2·3: 자동 선택
+    q2 = slide2_query(content_type, data)
+    q3 = slide3_query(content_type, data)
+    print(f"슬라이드2 이미지 검색: {q2}")
+    print(f"슬라이드3 이미지 검색: {q3}")
+    slide2_imgs = search_images(q2, count=1)
+    slide3_imgs = search_images(q3, count=1)
+    slide2_img = slide2_imgs[0] if slide2_imgs else (image_options[0] if image_options else "")
+    slide3_img = slide3_imgs[0] if slide3_imgs else (image_options[0] if image_options else "")
+
+    if not image_options:
         send_message(
             f"⚠️ 이미지 검색 실패\n\n**{title[:80]}**\n\n"
             "사진을 직접 첨부해주시면 계속 진행할게요."
@@ -130,12 +140,15 @@ def main():
         sm.save({"status": "awaiting_photo_manual", "content_type": content_type, "story": story})
         return
 
-    msg = send_photo_options(image_urls, title)
+    msg = send_photo_options(image_options, title)
     sm.save({
         "status": "awaiting_photo",
         "content_type": content_type,
         "story": story,
-        "image_options": image_urls,
+        "extracted_data": data,
+        "image_options": image_options,
+        "slide2_image": slide2_img,
+        "slide3_image": slide3_img,
         "last_message_id": msg["id"],
     })
     print("Discord 발송 완료.")
