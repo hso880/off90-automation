@@ -1,19 +1,18 @@
 #!/usr/bin/env python3
 """
 OFF90 데일리 파이프라인
-뉴스 수집 → 네이버 이미지 검색 → 텔레그램 사진 선택지 발송
+뉴스 수집 → 네이버 이미지 검색 → Discord 사진 선택지 발송
 """
 import sys, os
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from tools.news_scraper import scrape_news
 from tools.naver_image import search_images, build_query
-from tools.telegram_bot import send_message, send_photo_options
+from tools.discord_bot import send_message, send_photo_options
 import tools.state_manager as sm
 
 
 def select_top_story(news: dict):
-    """월드컵 경기결과 우선, 없으면 이적 오피셜/유력"""
     wc = [a for a in news.get("worldcup", []) if a.get("priority", 0) >= 3]
     if wc:
         return "worldcup", wc[0]
@@ -38,7 +37,7 @@ def main():
     content_type, story = select_top_story(news)
 
     if not story:
-        send_message("⚽ <b>OFF90</b>\n\n오늘은 주요 뉴스가 없습니다.")
+        send_message("⚽ **OFF90**\n\n오늘은 주요 뉴스가 없습니다.")
         return
 
     title = story.get("title_ko") or story.get("title", "")
@@ -46,11 +45,11 @@ def main():
 
     data = {}
     if content_type == "worldcup":
-        import re
-        for name, code in [("브라질","BRA"),("모로코","MAR"),("프랑스","FRA"),
-                           ("독일","GER"),("스페인","ESP"),("아르헨티나","ARG"),
-                           ("잉글랜드","ENG"),("포르투갈","POR"),("일본","JPN"),
-                           ("한국","KOR"),("대한민국","KOR"),("미국","USA")]:
+        for name, code in [
+            ("브라질","BRA"),("모로코","MAR"),("프랑스","FRA"),("독일","GER"),
+            ("스페인","ESP"),("아르헨티나","ARG"),("잉글랜드","ENG"),("포르투갈","POR"),
+            ("일본","JPN"),("한국","KOR"),("대한민국","KOR"),("미국","USA"),
+        ]:
             if name in title:
                 if not data.get("team_a"):
                     data["team_a"] = code
@@ -66,20 +65,22 @@ def main():
 
     if not image_urls:
         send_message(
-            f"⚠️ 이미지 검색 실패\n\n<b>{title[:80]}</b>\n\n"
-            "사진을 직접 보내주시면 계속 진행할게요."
+            f"⚠️ 이미지 검색 실패\n\n**{title[:80]}**\n\n"
+            "사진을 직접 첨부해주시면 계속 진행할게요."
         )
-        sm.save({"status": "awaiting_photo_manual", "content_type": content_type, "story": story})
+        sm.save({"status": "awaiting_photo_manual",
+                 "content_type": content_type, "story": story})
         return
 
+    msg = send_photo_options(image_urls, title)
     sm.save({
         "status": "awaiting_photo",
         "content_type": content_type,
         "story": story,
         "image_options": image_urls,
+        "last_message_id": msg["id"],
     })
-    send_photo_options(image_urls, title)
-    print("텔레그램 발송 완료.")
+    print("Discord 발송 완료.")
 
 
 if __name__ == "__main__":
