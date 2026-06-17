@@ -1,26 +1,32 @@
-# OFF90 텔레그램 파이프라인 설정 가이드
+# OFF90 Discord 파이프라인 설정 가이드
 
-## 사전 준비
+## Discord 봇 설정
 
-### 1. 레포 Public 전환
-Settings → General → Danger Zone → Change visibility → Public
+### 1단계: Discord 개발자 앱 생성
 
-### 2. Telegram 봇 생성
-1. Telegram에서 @BotFather 검색
-2. `/newbot` 입력
-3. 봇 이름 설정 (예: OFF90 Bot)
-4. **BOT_TOKEN** 복사 (형식: `1234567890:AAF...`)
+1. https://discord.com/developers/applications 접속
+2. **New Application** → 이름 입력 (예: `OFF90 Bot`) → Create
+3. 좌측 메뉴 **Bot** 클릭
+4. **Reset Token** → 토큰 복사 → `DISCORD_BOT_TOKEN`으로 저장
+5. 아래 **Privileged Gateway Intents** 에서
+   - **Message Content Intent** → 켜기 ✅
+   - Save Changes
 
-**CHAT_ID 확인:**
-```
-https://api.telegram.org/bot<BOT_TOKEN>/getUpdates
-```
-봇에게 아무 메시지 보낸 후 위 URL 열면 `"chat": {"id": 숫자}` 확인
+### 2단계: 봇 서버 초대
 
-### 3. 네이버 개발자 센터
-1. https://developers.naver.com → 애플리케이션 등록
-2. 사용 API: **검색** 체크
-3. **NAVER_CLIENT_ID**, **NAVER_CLIENT_SECRET** 복사
+1. 좌측 메뉴 **OAuth2 → URL Generator**
+2. Scopes: **bot** 체크
+3. Bot Permissions:
+   - **Send Messages** ✅
+   - **Attach Files** ✅
+   - **Embed Links** ✅
+   - **Read Message History** ✅
+4. 생성된 URL 복사 → 브라우저 열기 → 서버 선택해서 초대
+
+### 3단계: 채널 ID 복사
+
+1. Discord → 사용자 설정(⚙️) → **고급** → **개발자 모드** 켜기
+2. 봇이 있는 채널 우클릭 → **채널 ID 복사** → `DISCORD_CHANNEL_ID`로 저장
 
 ---
 
@@ -30,28 +36,29 @@ Settings → Secrets and variables → Actions → New repository secret
 
 | Secret 이름 | 값 |
 |---|---|
-| `TELEGRAM_BOT_TOKEN` | BotFather에서 받은 토큰 |
-| `TELEGRAM_CHAT_ID` | getUpdates에서 확인한 숫자 |
-| `NAVER_CLIENT_ID` | 네이버 앱 클라이언트 ID |
-| `NAVER_CLIENT_SECRET` | 네이버 앱 시크릿 |
+| `DISCORD_BOT_TOKEN` | Discord 개발자 포털 봇 토큰 |
+| `DISCORD_CHANNEL_ID` | Discord 채널 ID (숫자) |
+| `NAVER_CLIENT_ID` | 네이버 개발자 센터 클라이언트 ID |
+| `NAVER_CLIENT_SECRET` | 네이버 개발자 센터 시크릿 |
 
-기존 시크릿 (이미 있어야 함):
+기존 유지 (이미 있어야 함):
 - `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`
 - `IG_ACCESS_TOKEN`, `IG_BUSINESS_ACCOUNT_ID`
 
 ---
 
-## Workflow 파일 추가
+## 네이버 이미지 검색 API
 
-> ⚠️ PAT 권한 문제로 워크플로우 파일은 직접 추가해야 합니다.
+1. https://developers.naver.com → 로그인 → **Application → 애플리케이션 등록**
+2. 사용 API → **검색** 체크
+3. 환경 추가 → WEB 설정 → URL: `https://github.com`
+4. **Client ID**, **Client Secret** 복사
 
-### 방법
-GitHub 레포 → **Actions** 탭 → New workflow → Set up a workflow yourself
+---
 
-또는 로컬에서:
-```bash
-mkdir -p .github/workflows
-```
+## Workflow 파일 2개 추가
+
+GitHub 레포 → 상단 **Add file → Create new file**
 
 ---
 
@@ -62,7 +69,7 @@ name: Daily Content Pipeline
 
 on:
   schedule:
-    - cron: '0 23 * * *'   # 매일 오전 8시 KST (UTC 23:00 전날)
+    - cron: '0 23 * * *'   # 매일 오전 8시 KST
   workflow_dispatch:
 
 jobs:
@@ -84,8 +91,8 @@ jobs:
 
       - name: 파이프라인 실행
         env:
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          DISCORD_BOT_TOKEN: ${{ secrets.DISCORD_BOT_TOKEN }}
+          DISCORD_CHANNEL_ID: ${{ secrets.DISCORD_CHANNEL_ID }}
           NAVER_CLIENT_ID: ${{ secrets.NAVER_CLIENT_ID }}
           NAVER_CLIENT_SECRET: ${{ secrets.NAVER_CLIENT_SECRET }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -95,10 +102,10 @@ jobs:
 
 ---
 
-### 파일 2: `.github/workflows/poll_telegram.yml`
+### 파일 2: `.github/workflows/poll_discord.yml`
 
 ```yaml
-name: Poll Telegram
+name: Poll Discord
 
 on:
   schedule:
@@ -127,8 +134,8 @@ jobs:
 
       - name: 응답 처리
         env:
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          DISCORD_BOT_TOKEN: ${{ secrets.DISCORD_BOT_TOKEN }}
+          DISCORD_CHANNEL_ID: ${{ secrets.DISCORD_CHANNEL_ID }}
           CLOUDINARY_CLOUD_NAME: ${{ secrets.CLOUDINARY_CLOUD_NAME }}
           CLOUDINARY_API_KEY: ${{ secrets.CLOUDINARY_API_KEY }}
           CLOUDINARY_API_SECRET: ${{ secrets.CLOUDINARY_API_SECRET }}
@@ -141,21 +148,28 @@ jobs:
 
 ---
 
-## 테스트 순서
+## 사용 흐름
 
-1. Actions → Daily Content Pipeline → Run workflow (수동 실행)
-2. Telegram 봇에서 사진 3장 + 버튼 수신 확인
-3. 번호 탭 → 60초 대기 → 캐러셀 미리보기 수신 확인
-4. "발행해줘" 입력 → Instagram 확인
+```
+매일 오전 8시 KST
+  → Discord 채널에 사진 3장 + "1, 2, 3 중 입력" 메시지
+
+사용자: 2
+  → 약 60초 후 캐러셀 슬라이드 4장 + 초안 캡션 수신
+
+사용자: (원하는 캡션 직접 입력)
+  → "캡션 저장됨" 확인 메시지
+
+사용자: 발행해줘
+  → Instagram 업로드 완료 + 링크 수신
+```
 
 ---
 
 ## 상태 머신
 
 ```
-idle
-  └─[매일 8시]→ awaiting_photo (사진 3장 텔레그램 발송)
-                  └─[번호 탭]→ generating_carousel (Playwright 렌더)
-                                └─[완료]→ awaiting_publish (미리보기 발송)
-                                            └─[발행해줘]→ published → idle
+idle → awaiting_photo → (generating) → awaiting_publish → published → idle
 ```
+
+상태는 `pending/state.json` 에 자동 저장됩니다.
