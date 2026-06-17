@@ -14,21 +14,29 @@ def send_message(text: str) -> dict:
     return r.json()
 
 
-def send_photo_options(image_urls: list, news_title: str) -> dict:
-    """3장 사진을 임베드로 한 메시지에 발송"""
+def send_photo_confirm(photos: dict, story_title: str) -> dict:
+    """슬라이드1·2·3 자동 선택 사진 → Discord 확인 요청"""
+    labels = {"s1": "슬라이드 1 (메인)", "s2": "슬라이드 2 (View 01)", "s3": "슬라이드 3 (View 02)"}
     embeds = []
-    for i, url in enumerate(image_urls[:3], 1):
-        embeds.append({
-            "title": f"{i}번",
-            "image": {"url": url},
-            "color": 0x00873E,
-        })
+    for key in ("s1", "s2", "s3"):
+        url = photos.get(key, "")
+        if url:
+            embeds.append({
+                "title": labels[key],
+                "image": {"url": url},
+                "color": 0x00873E,
+            })
     payload = {
-        "content": f"**{news_title[:120]}**\n\n사진을 골라주세요. **1**, **2**, **3** 중 하나를 입력하세요:",
+        "content": (
+            f"**{story_title[:80]}**\n\n"
+            "자동으로 고른 사진들이에요 👆\n\n"
+            "**OK** — 이대로 제작 시작\n"
+            "**다시** — 사진 전체 새로 검색\n"
+            "**1번 바꿔** / **2번 바꿔** / **3번 바꿔** — 해당 슬라이드 사진만 교체"
+        ),
         "embeds": embeds,
     }
-    r = requests.post(f"{BASE}/channels/{CHANNEL_ID}/messages",
-                      headers=HDR, json=payload)
+    r = requests.post(f"{BASE}/channels/{CHANNEL_ID}/messages", headers=HDR, json=payload)
     r.raise_for_status()
     return r.json()
 
@@ -41,11 +49,10 @@ def send_carousel_preview(slide_paths: list, draft_caption: str) -> dict:
         files[f"files[{i}]"] = (Path(path).name, open(str(path), "rb"), "image/png")
 
     content = (
-        f"캐러셀 완성!\n\n"
+        f"캐러셀 완성! 👇\n\n"
         f"✏️ 초안 캡션:\n\n{draft_caption}\n\n"
         "───\n"
-        "캡션을 수정하려면 직접 입력해주세요.\n"
-        "그대로 쓰려면 **발행해줘** 라고 입력해주세요."
+        "캡션 수정하려면 직접 입력, 그대로면 **발행해줘**"
     )
     r = requests.post(
         f"{BASE}/channels/{CHANNEL_ID}/messages",
@@ -60,7 +67,6 @@ def send_carousel_preview(slide_paths: list, draft_caption: str) -> dict:
 
 
 def get_recent_messages(limit: int = 50) -> list:
-    """최근 메시지 가져오기 (최신순)"""
     r = requests.get(f"{BASE}/channels/{CHANNEL_ID}/messages",
                      headers=HDR, params={"limit": limit})
     r.raise_for_status()
