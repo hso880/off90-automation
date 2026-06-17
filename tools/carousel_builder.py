@@ -81,6 +81,8 @@ def extract_transfer_data(headline: str, priority: int = 1) -> dict:
     reliability = {3: "🟢 OFFICIAL", 2: "🟡 LIKELY", 1: "🔴 RUMOUR"}.get(priority, "🔴")
     clean = re.sub(r"[-|·,].*$", "", headline).strip()
     short = clean[:35]
+    words = headline.split()
+    player = " ".join(words[:2]) if words else headline
     return {
         "team_a": "TRANSFER", "team_b": "NEWS",
         "score_a": "", "score_b": "",
@@ -97,12 +99,15 @@ def extract_transfer_data(headline: str, priority: int = 1) -> dict:
         "match_a_date": "", "match_a_home": "", "match_a_away": "", "match_a_venue": "",
         "match_b_date": "", "match_b_home": "", "match_b_away": "", "match_b_venue": "",
         "team_a_class": "transfer", "team_b_class": "news",
+        "player": player,
     }
 
 
-def build_html(data: dict, photo_url: str) -> str:
+def build_html(data: dict, photo_s1: str, photo_s2: str = "", photo_s3: str = "") -> str:
     html = TEMPLATE_PATH.read_text(encoding="utf-8")
-    html = html.replace("{{PHOTO_URL}}", photo_url)
+    html = html.replace("{{PHOTO_URL_S1}}", photo_s1)
+    html = html.replace("{{PHOTO_URL_S2}}", photo_s2 or photo_s1)
+    html = html.replace("{{PHOTO_URL_S3}}", photo_s3 or photo_s2 or photo_s1)
     mapping = {
         "{{EYEBROW}}": data.get("eyebrow", ""),
         "{{HEADLINE_LINE1}}": data.get("headline_line1", ""),
