@@ -1,5 +1,5 @@
 {
-  "status": "generating",
+  "status": "awaiting_publish",
   "content_type": "worldcup",
   "story": {
     "title": "축구 FIFA 월드컵 2026: 전 경기 일정·경기 결과·조별 예선 순위·스코어 모아보기",
@@ -10,10 +10,13 @@
     "priority": 3,
     "short_link": "https://tinyurl.com/2agcqbvy"
   },
-  "image_options": [
-    "http://imgnews.naver.net/image/421/2023/01/19/0006586344_001_20230119215001585.jpg",
-    "https://img2.sbs.co.kr/img/sbs_cms/WE/2023/11/15/oAT1700032059468.png",
-    "http://imgnews.naver.net/image/001/2026/04/01/GYH2026040100020004400_P2_20260401083914497.jpg"
+  "selected_image": "https://img2.sbs.co.kr/img/sbs_cms/WE/2023/11/15/oAT1700032059468.png",
+  "cloudinary_urls": [
+    "https://res.cloudinary.com/dlip3de7u/image/upload/v1781707760/off90/auto/drdjn9ccnw0iolba1h7i.png",
+    "https://res.cloudinary.com/dlip3de7u/image/upload/v1781707761/off90/auto/cxlgjy7v5j0cotkbqa9y.png",
+    "https://res.cloudinary.com/dlip3de7u/image/upload/v1781707761/off90/auto/qgy1tvtrmeeicx6mdkpp.png",
+    "https://res.cloudinary.com/dlip3de7u/image/upload/v1781707762/off90/auto/qvzbhnlhc0cxe9mundp5.png"
   ],
-  "last_message_id": "1516816988964524065"
+  "pending_caption": "TEAM A ?-? TEAM B\n\n축구 FIFA 월드컵 2026: 전 경기 일정·경기 결과·조별 예선 순위·스코어 모아보기\n\n#월드컵2026 #team a #team b #2026월드컵 #FIFA월드컵 #off90",
+  "last_message_id": "1516817040126513152"
 }
