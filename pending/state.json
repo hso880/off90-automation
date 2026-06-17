@@ -1,1 +1,19 @@
-{"status": "idle"}
+{
+  "status": "awaiting_photo",
+  "content_type": "worldcup",
+  "story": {
+    "title": "축구: 프랑스·아르헨티나 조별 예선 1차전 라이브 스코어·경기 결과 - FIFA 월드컵 2026",
+    "link": "https://news.google.com/rss/articles/CBMihwFBVV95cUxNcG10amZ6WDRCZ29VTmJvT1RWY3VxUjY2V3J1SDBPQjZwU3JsX0hXalhDUGFKS2lMMzBPY1NnVUdOb00tME9YTGU3QTZFTW9wVGQ3aFZOZVBPSUJEUGdEWW00dXVYQjFna3Y3U3pBbXh3ZGtTdTJJSVhpNHg1N1d0X2J0cDdpcWc?oc=5",
+    "published": "Wed, 17 Jun 2026 06:18:00 GMT",
+    "title_ko": "축구: 프랑스·아르헨티나 조별 예선 1차전 라이브 스코어·경기 결과 - FIFA 월드컵 2026",
+    "lang": "ko",
+    "priority": 3,
+    "short_link": "https://tinyurl.com/2ypaxlb7"
+  },
+  "image_options": [
+    "https://upload.wikimedia.org/wikipedia/commons/9/9b/Aerial_view_of_Arrowhead_Stadium_08-31-2013_crop.jpg",
+    "https://www.hankookilbo.com/public-image/og/worldcup/northamerica2026_og_1200x630.jpg",
+    "https://pup-post-phinf.pstatic.net/MjAyNjA2MTVfMjk5/MDAxNzgxNTMwNDcxOTIx.51UmolC5Y94PlcemWfuqeeFR6OWwcOG7kTX1Xmfx97Ug.0SmkojmHlgctbono9Awq2IcxLVK-12ClGfUmAanjvkYg.JPEG/PostEncodingTask.181A9CBC-D847-44B6-97C0-18B9C3A591A4.jpg"
+  ],
+  "last_message_id": "1516821199970111619"
+}
