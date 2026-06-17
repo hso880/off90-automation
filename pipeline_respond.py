@@ -1,22 +1,44 @@
 #!/usr/bin/env python3
 """
-텔레그램 폴링 응답기 (5분마다 실행)
+Discord 폴링 응답기 (5분마다 실행)
 """
 import os, sys, tempfile
 from pathlib import Path
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from tools.telegram_bot import get_updates, answer_callback, send_message, send_carousel_preview
+from tools.discord_bot import get_recent_messages, send_message, send_carousel_preview
 import tools.state_manager as sm
 
 PUBLISH_KW = {"발행해줘", "발행", "승인", "올려줘", "게시해줘", "올려"}
+BOT_TOKEN  = os.environ["DISCORD_BOT_TOKEN"]
+
+
+def _bot_id():
+    import requests
+    r = requests.get("https://discord.com/api/v10/users/@me",
+                     headers={"Authorization": f"Bot {BOT_TOKEN}"})
+    return r.json().get("id", "")
+
+
+def get_new_user_messages(last_msg_id: str) -> list:
+    """last_msg_id 이후의 사용자 메시지 (오래된 순)"""
+    msgs = get_recent_messages(50)
+    bot_id = _bot_id()
+    result = []
+    for m in reversed(msgs):        # Discord API는 최신순 → 뒤집어 오래된 순으로
+        if int(m["id"]) <= int(last_msg_id or "0"):
+            continue
+        if m["author"].get("bot") or m["author"]["id"] == bot_id:
+            continue
+        result.append(m)
+    return result
 
 
 def handle_photo_selection(choice: int, state: dict):
     urls = state.get("image_options", [])
     if not (1 <= choice <= len(urls)):
-        send_message("1~3 중에서 선택해주세요.")
+        send_message("1~3 중에서 입력해주세요.")
         return
 
     selected_url = urls[choice - 1]
@@ -24,9 +46,14 @@ def handle_photo_selection(choice: int, state: dict):
     story = state.get("story", {})
     title = story.get("title_ko") or story.get("title", "")
 
-    send_message("🎨 캐러셀 생성 중... (약 60초 소요)")
+    msg = send_message("🎨 캐러셀 생성 중... (약 60초 소요)")
+    sm.save({**state,
+             "status": "generating",
+             "last_message_id": msg["id"]})
 
-    from tools.carousel_builder import extract_worldcup_data, extract_transfer_data, build_html, render
+    from tools.carousel_builder import (
+        extract_worldcup_data, extract_transfer_data, build_html, render
+    )
 
     if content_type == "worldcup":
         data = extract_worldcup_data(title, story.get("published", ""))
@@ -41,14 +68,14 @@ def handle_photo_selection(choice: int, state: dict):
 
         if not slide_paths:
             send_message("캐러셀 생성 실패. 다시 시도해주세요.")
+            sm.save({**state, "status": "awaiting_photo"})
             return
 
         from tools.ig_publisher import upload_to_cloudinary
         cloudinary_urls = []
         for p in slide_paths:
             try:
-                url = upload_to_cloudinary(p)
-                cloudinary_urls.append(url)
+                cloudinary_urls.append(upload_to_cloudinary(p))
             except Exception as e:
                 print(f"  Cloudinary 업로드 실패: {e}")
 
@@ -68,16 +95,17 @@ def handle_photo_selection(choice: int, state: dict):
                 f"#이적시장 #해외축구 #2026이적 #축구 #off90"
             )
 
-        sm.save({
-            "status": "awaiting_publish",
-            "content_type": content_type,
-            "story": story,
-            "selected_image": selected_url,
-            "cloudinary_urls": cloudinary_urls,
-            "pending_caption": draft,
-        })
+        preview_msg = send_carousel_preview(slide_paths, draft)
 
-        send_carousel_preview(slide_paths, draft)
+    sm.save({
+        "status": "awaiting_publish",
+        "content_type": content_type,
+        "story": story,
+        "selected_image": selected_url,
+        "cloudinary_urls": cloudinary_urls,
+        "pending_caption": draft,
+        "last_message_id": preview_msg["id"],
+    })
 
 
 def handle_publish(state: dict, caption: str = None):
@@ -88,82 +116,70 @@ def handle_publish(state: dict, caption: str = None):
         return
 
     final_caption = caption or state.get("pending_caption", "")
-    send_message("📤 Instagram 발행 중...")
+    msg = send_message("📤 Instagram 발행 중...")
+    sm.save({**state, "last_message_id": msg["id"]})
 
     try:
         from tools.ig_publisher import publish_carousel
         media_id = publish_carousel(urls, final_caption)
-        send_message(f"✅ 업로드 완료!\n\nhttps://www.instagram.com/p/{media_id}/")
+        send_message(f"✅ 업로드 완료!\nhttps://www.instagram.com/p/{media_id}/")
         sm.save({"status": "published"})
     except Exception as e:
         send_message(f"❌ 발행 실패: {e}")
 
 
 def main():
-    offset = sm.load_offset()
-    result = get_updates(offset)
-    updates = result.get("result", [])
+    state = sm.load()
+    last_msg_id = state.get("last_message_id", "0")
+    status = state.get("status", "idle")
 
-    if not updates:
+    if status == "generating":
+        # 캐러셀 생성 중 → 무시
         return
 
-    state = sm.load()
-    last_id = None
+    new_msgs = get_new_user_messages(last_msg_id)
+    if not new_msgs:
+        return
 
-    for update in updates:
-        last_id = update["id"]
-
-        # 인라인 버튼 콜백
-        if "callback_query" in update:
-            cb = update["callback_query"]
-            cb_data = cb.get("data", "")
-            answer_callback(cb["id"])
-
-            if cb_data.startswith("photo_") and state.get("status") == "awaiting_photo":
-                try:
-                    choice = int(cb_data.split("_")[1])
-                    handle_photo_selection(choice, state)
-                    state = sm.load()
-                except (ValueError, IndexError):
-                    pass
-            continue
-
-        # 일반 텍스트
-        msg = update.get("message", {})
-        text = msg.get("text", "").strip()
+    for msg in new_msgs:
+        text = msg.get("content", "").strip()
         if not text:
             continue
 
+        # last_message_id 업데이트
+        sm.save({**state, "last_message_id": msg["id"]})
+        state = sm.load()
         status = state.get("status", "idle")
 
-        if any(kw in text for kw in PUBLISH_KW):
+        # 사진 선택 (숫자 입력)
+        if status == "awaiting_photo" and text in ("1", "2", "3"):
+            handle_photo_selection(int(text), state)
+            state = sm.load()
+
+        # 발행 명령
+        elif any(kw in text for kw in PUBLISH_KW):
             if status == "awaiting_publish":
                 handle_publish(state)
                 state = sm.load()
             else:
-                send_message("발행할 콘텐츠가 없습니다. 먼저 뉴스 사진을 선택해주세요.")
+                send_message("발행할 콘텐츠가 없습니다. 먼저 뉴스 사진 번호를 선택해주세요.")
 
-        elif status == "awaiting_publish" and len(text) > 8 and not text.startswith("/"):
-            # 사용자 캡션 입력
+        # 캡션 수정
+        elif status == "awaiting_publish" and len(text) > 5 and not text.startswith("/"):
             updated = {**state, "pending_caption": text}
             sm.save(updated)
             state = updated
             send_message(
-                f"✅ 캡션 저장됨:\n\n{text}\n\n"
-                "<b>발행해줘</b> 라고 보내면 Instagram에 올려드릴게요."
+                f"✅ 캡션 저장됨:\n\n{text}\n\n**발행해줘** 라고 입력하면 Instagram에 올려드릴게요."
             )
 
-        elif text.lower() in ("/start", "/help", "도움말"):
+        elif text.lower() in ("/help", "도움말"):
             send_message(
-                "⚽ <b>OFF90 자동화 봇</b>\n\n"
-                "매일 뉴스 + 사진 선택지를 보내드립니다.\n\n"
-                "① 사진 번호 선택 → 캐러셀 생성\n"
-                "② 캡션 수정 입력 (선택)\n"
-                "③ <b>발행해줘</b> → Instagram 자동 업로드"
+                "⚽ **OFF90 자동화 봇**\n\n"
+                "① 뉴스 사진 번호 입력 (1/2/3)\n"
+                "② 캡션 수정 입력 (선택사항)\n"
+                "③ **발행해줘** → Instagram 자동 업로드"
             )
-
-    if last_id is not None:
-        sm.save_offset(last_id)
 
 
 if __name__ == "__main__":
