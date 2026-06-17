@@ -42,6 +42,8 @@ def handle_photo_selection(choice: int, state: dict):
         return
 
     selected_url = urls[choice - 1]
+    slide2_img   = state.get("slide2_image", selected_url)
+    slide3_img   = state.get("slide3_image", selected_url)
     content_type = state.get("content_type", "worldcup")
     story = state.get("story", {})
     title = story.get("title_ko") or story.get("title", "")
@@ -55,12 +57,15 @@ def handle_photo_selection(choice: int, state: dict):
         extract_worldcup_data, extract_transfer_data, build_html, render
     )
 
-    if content_type == "worldcup":
-        data = extract_worldcup_data(title, story.get("published", ""))
-    else:
-        data = extract_transfer_data(title, story.get("priority", 1))
+    # state에 저장된 extracted_data가 있으면 재사용, 없으면 새로 추출
+    data = state.get("extracted_data")
+    if not data:
+        if content_type == "worldcup":
+            data = extract_worldcup_data(title, story.get("published", ""))
+        else:
+            data = extract_transfer_data(title, story.get("priority", 1))
 
-    html = build_html(data, selected_url)
+    html = build_html(data, selected_url, slide2_img, slide3_img)
 
     with tempfile.TemporaryDirectory() as tmp:
         tmp_path = Path(tmp)
