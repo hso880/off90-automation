@@ -88,7 +88,7 @@
   .s1 { background: #000; }
   .s1 .photo {
     position: absolute; inset: 0;
-    background-image: url('{{PHOTO_URL}}');
+    background-image: url('{{PHOTO_URL_S1}}');
     background-size: cover;
     background-position: center 15%;
     filter: contrast(1.05) saturate(1.1);
@@ -223,9 +223,17 @@
      SLIDE 3 & 4 — View 단일 컬럼
   ══════════════════ */
   .s3, .s4 { background: #0a0a0a; position: relative; overflow: hidden; }
-  .s3 .ph, .s4 .ph {
+  .s3 .ph {
     position: absolute; inset: 0;
-    background-image: url('{{PHOTO_URL}}');
+    background-image: url('{{PHOTO_URL_S2}}');
+    background-size: cover;
+    background-position: center 20%;
+    filter: brightness(0.42) grayscale(12%);
+    z-index: 0;
+  }
+  .s4 .ph {
+    position: absolute; inset: 0;
+    background-image: url('{{PHOTO_URL_S3}}');
     background-size: cover;
     background-position: center 20%;
     filter: brightness(0.42) grayscale(12%);
