@@ -104,22 +104,27 @@ def handle_story_selection(choice: int, state: dict):
     else:
         data = extract_transfer_data(title, story.get("published", ""), story.get("priority", 1))
 
-    photos = _auto_select_photos(content_type, data)
-    print(f"S1: {photos['s1'][:60] if photos['s1'] else '없음'}")
-    print(f"S2: {photos['s2'][:60] if photos['s2'] else '없음'}")
-    print(f"S3: {photos['s3'][:60] if photos['s3'] else '없음'}")
+    try:
+        photos = _auto_select_photos(content_type, data)
+        print(f"S1: {photos['s1'][:60] if photos['s1'] else '없음'}")
+        print(f"S2: {photos['s2'][:60] if photos['s2'] else '없음'}")
+        print(f"S3: {photos['s3'][:60] if photos['s3'] else '없음'}")
+        confirm_msg = send_photo_confirm(photos, title)
+        sm.save({
+            "status": "awaiting_photo_confirm",
+            "content_type": content_type,
+            "story": story,
+            "extracted_data": data,
+            "photos": photos,
+            "tried_urls": list(photos.values()),
+            "last_message_id": confirm_msg["id"],
+        })
+    except Exception as e:
+        print(f"사진 검색 오류: {e}")
+        send_message(f"⚠️ 사진 검색 중 오류 발생: {e}
 
-    confirm_msg = send_photo_confirm(photos, title)
-
-    sm.save({
-        "status": "awaiting_photo_confirm",
-        "content_type": content_type,
-        "story": story,
-        "extracted_data": data,
-        "photos": photos,
-        "tried_urls": list(photos.values()),
-        "last_message_id": confirm_msg["id"],
-    })
+번호를 다시 입력해주세요.")
+        sm.save({**state, "status": "awaiting_story_selection"})
 
 
 def handle_photo_confirm(text: str, state: dict):
