@@ -1,78 +1,51 @@
 {
-  "status": "searching",
-  "news_list": {
-    "1": [
-      "worldcup",
-      {
-        "title": "축구: 포르투갈·잉글랜드·크로아티아 조별 예선 1차전 라이브 스코어·경기 결과 - FIFA 월드컵 2026",
-        "link": "https://news.google.com/rss/articles/CBMihwFBVV95cUxPVHAxcFcxeDh4ZGZqdGluVEFpTmE5Z1NGUWlHeXFjX2RndjFfM1dzWC1uZ2pSMEtlZkE0M3E4cldTRG1YM1haVmFYWV9SNnZZcUl1eERzdmY0blpheU01RC1tUEhIckFnaEN0Q3VtWUZub0dzZWRrLTFLTkRQNENrQk5JWmstSUE?oc=5",
-        "published": "Wed, 17 Jun 2026 17:00:00 GMT",
-        "title_ko": "축구: 포르투갈·잉글랜드·크로아티아 조별 예선 1차전 라이브 스코어·경기 결과 - FIFA 월드컵 2026",
-        "lang": "ko",
-        "priority": 3,
-        "short_link": "https://tinyurl.com/2y8ul4bx"
-      }
-    ],
-    "2": [
-      "worldcup",
-      {
-        "title": "축구: 프랑스·아르헨티나 조별 예선 1차전 라이브 스코어·경기 결과 - FIFA 월드컵 2026",
-        "link": "https://news.google.com/rss/articles/CBMihwFBVV95cUxNcG10amZ6WDRCZ29VTmJvT1RWY3VxUjY2V3J1SDBPQjZwU3JsX0hXalhDUGFKS2lMMzBPY1NnVUdOb00tME9YTGU3QTZFTW9wVGQ3aFZOZVBPSUJEUGdEWW00dXVYQjFna3Y3U3pBbXh3ZGtTdTJJSVhpNHg1N1d0X2J0cDdpcWc?oc=5",
-        "published": "Wed, 17 Jun 2026 06:18:00 GMT",
-        "title_ko": "축구: 프랑스·아르헨티나 조별 예선 1차전 라이브 스코어·경기 결과 - FIFA 월드컵 2026",
-        "lang": "ko",
-        "priority": 3,
-        "short_link": "https://tinyurl.com/2ypaxlb7"
-      }
-    ],
-    "3": [
-      "worldcup",
-      {
-        "title": "2026 북중미 월드컵 음바페-홀란드-메시, 첫 경기서 나란히 멀티골",
-        "link": "https://news.google.com/rss/articles/CBMickFVX3lxTE9JRzB0cEF1Y3BXWnM3SFFRUDVhVWR2MkpyM083c2FRQXhJRFJyTS1HM3FfM3l5ZVNqb0xoczNoYml5U1RocnhDc1liUTJiNHpGaEZYNlZqNUh4d3h3cjVTVnJqMTBqUkQ4ODFKWk51UTRnUQ?oc=5",
-        "published": "Wed, 17 Jun 2026 03:25:46 GMT",
-        "title_ko": "2026 북중미 월드컵 음바페-홀란드-메시, 첫 경기서 나란히 멀티골",
-        "lang": "ko",
-        "priority": 3,
-        "short_link": "https://tinyurl.com/2cc4xbme"
-      }
-    ],
-    "4": [
-      "worldcup",
-      {
-        "title": "2026 월드컵 J조 축구 경기 결과: 오스트리아 3-1 요르단 – 오스트리아, 이변을 극복하고 36년 만에 월드컵 우승을 거머쥐다.",
-        "link": "https://news.google.com/rss/articles/CBMi5AFBVV95cUxQaGRYSHN0bGRwdXpTVU9DWmhCcnZ5MnlFMlRlTGgzZkh5MmdVM2FLeS0wSENOQmFmcDRsekhpY2pMQS1KVEJzdUtGLUlFZEtXRUZhcGtJdjFQRjYzcGtzRm9EZ2JoUmRKaHNlNGV3ZTZZZ0dZLVdYQmJJWHJaUzFLdVBCN09nTGpXS3FKajZTVEs4WGZSNjFZWjViX0dSSm9MVmtMMzQ4T2plY05GLTFweGlQYUVjR0NQZEtqNERxZ250OTA4dHFIUm5Zbi1BNzFtaE5oSTU1UTQ1elIxellxeWVucm0?oc=5",
-        "published": "Wed, 17 Jun 2026 08:27:19 GMT",
-        "title_ko": "2026 월드컵 J조 축구 경기 결과: 오스트리아 3-1 요르단 – 오스트리아, 이변을 극복하고 36년 만에 월드컵 우승을 거머쥐다.",
-        "lang": "ko",
-        "priority": 3,
-        "short_link": "https://tinyurl.com/28jnwz7w"
-      }
-    ],
-    "5": [
-      "worldcup",
-      {
-        "title": "'해트트릭' 메시, 월드컵 최다골 타이… 아르헨티나 조별리그 1차전서 알제리 3-0 완파",
-        "link": "https://news.google.com/rss/articles/CBMiXEFVX3lxTFBZenkyN29kTHZtRVoxZUFNX1pZYzdNVkR6RFBaaHJZbnRZcWVveTlQeUhNcXVBNjdLZDVnRndrWnRLd0JIU28xMTk0T3V2SFNZaDd5b24wdFJqci1x0gFiQVVfeXFMUFVMb3poUEFsMTNzZTlNMWtlM3JTU3N3bVJ5WGsySWJvNDdiMW1zczd2djNqT0ZkMThVMkhHbWNmd0hQaVJuY2dCR2NnWTcxQ2lZY2kwSG9kb2ZEZjZJNnZqV0E?oc=5",
-        "published": "Wed, 17 Jun 2026 08:22:25 GMT",
-        "title_ko": "'해트트릭' 메시, 월드컵 최다골 타이… 아르헨티나 조별리그 1차전서 알제리 3-0 완파",
-        "lang": "ko",
-        "priority": 3,
-        "short_link": "https://tinyurl.com/2727y7vk"
-      }
-    ],
-    "6": [
-      "transfer",
-      {
-        "title": "Fabrizio Romano confirms Liverpool's transfer stunner for Victor Muñoz",
-        "link": "https://news.google.com/rss/articles/CBMigAJBVV95cUxPTmpzOVNNTTZTcmNlUlZqSW93bTR5TEMxVTdkdVROa2xZQWVVTWxiRG5KdHVoME9FeTNjd1BzZWhZMll1R3J3dkdNS0Qxb3pDN3JvTGhvRDdtaE8wdjhxLWVwZ29KVU4tU3hFZ3NPWWpMMDdibGR2bW5NMHJvalNYUHAxWjRZWFNhWHQxaFB6TXUzTzdWWmlabW1taGN0TklzUGM5c25UUExWSGhqWjNyQXNHOWdfSkJ0OUtWQ09teFpJN3ZOdHJqaXNkWjlNVThweW9tXzBlOWk2QkpicWpxSXZPbGU4ckdYb0lXbzZHWnZTY2ZXWWNfd3NIS2h1cEpT?oc=5",
-        "published": "Wed, 17 Jun 2026 23:21:15 GMT",
-        "title_ko": "파브리치오 로마노는 리버풀의 빅터 무뇨스 영입을 확정했다.",
-        "lang": "en",
-        "priority": 2,
-        "short_link": "https://tinyurl.com/2bzxu2th"
-      }
-    ]
+  "status": "awaiting_photo_confirm",
+  "content_type": "worldcup",
+  "story": {
+    "title": "2026 북중미 월드컵 음바페-홀란드-메시, 첫 경기서 나란히 멀티골",
+    "link": "https://news.google.com/rss/articles/CBMickFVX3lxTE9JRzB0cEF1Y3BXWnM3SFFRUDVhVWR2MkpyM083c2FRQXhJRFJyTS1HM3FfM3l5ZVNqb0xoczNoYml5U1RocnhDc1liUTJiNHpGaEZYNlZqNUh4d3h3cjVTVnJqMTBqUkQ4ODFKWk51UTRnUQ?oc=5",
+    "published": "Wed, 17 Jun 2026 03:25:46 GMT",
+    "title_ko": "2026 북중미 월드컵 음바페-홀란드-메시, 첫 경기서 나란히 멀티골",
+    "lang": "ko",
+    "priority": 3,
+    "short_link": "https://tinyurl.com/2cc4xbme"
   },
-  "last_message_id": "1517177848824074320"
+  "extracted_data": {
+    "team_a": "TEAM A",
+    "team_b": "TEAM B",
+    "score_a": "?",
+    "score_b": "?",
+    "eyebrow": "WC '26 · Wed, 17 Ju",
+    "headline_line1": "2026 북중미 월드컵 음바페-홀란드-메시",
+    "headline_line2": "첫 경기서 나란히",
+    "point_01": "TEAM A 승리 · ?-?",
+    "point_02": "주요 장면 하이라이트",
+    "point_03": "경기 총평",
+    "view01_title": "경기 흐름",
+    "view01_text": "2026 북중미 월드컵 음바페-홀란드-메시, 첫 경기서 나란히 멀티골",
+    "view02_title": "핵심 포인트",
+    "view02_text": "TEAM A와 TEAM B의 다음 경기가 주목된다.",
+    "next_label": "NEXT MATCH",
+    "match_a_date": "TBD",
+    "match_a_home": "TEAM A",
+    "match_a_away": "TBD",
+    "match_a_venue": "Stadium TBD",
+    "match_b_date": "TBD",
+    "match_b_home": "TEAM B",
+    "match_b_away": "TBD",
+    "match_b_venue": "Stadium TBD",
+    "team_a_class": "tea",
+    "team_b_class": "tea"
+  },
+  "photos": {
+    "s1": "https://upload.wikimedia.org/wikipedia/commons/9/9b/Aerial_view_of_Arrowhead_Stadium_08-31-2013_crop.jpg",
+    "s2": "https://shop-phinf.pstatic.net/20260526_203/1779795962855sx00Y_JPEG/72521081150525959_1240928877.jpeg",
+    "s3": "https://i.ytimg.com/vi/71w_dI4Gk9s/maxresdefault.jpg"
+  },
+  "tried_urls": [
+    "https://upload.wikimedia.org/wikipedia/commons/9/9b/Aerial_view_of_Arrowhead_Stadium_08-31-2013_crop.jpg",
+    "https://shop-phinf.pstatic.net/20260526_203/1779795962855sx00Y_JPEG/72521081150525959_1240928877.jpeg",
+    "https://i.ytimg.com/vi/71w_dI4Gk9s/maxresdefault.jpg"
+  ],
+  "last_message_id": "1517177866125709455"
 }
