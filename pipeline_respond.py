@@ -30,13 +30,21 @@ def _bot_id():
 def get_new_user_messages(last_msg_id: str) -> list:
     msgs = get_recent_messages(50)
     bot_id = _bot_id()
+    print(f"[DEBUG] bot_id={bot_id} last_msg_id={last_msg_id} total_msgs={len(msgs)}")
+    if msgs:
+        newest = msgs[0]["id"]
+        oldest = msgs[-1]["id"]
+        print(f"[DEBUG] newest_msg_id={newest} oldest_msg_id={oldest}")
     result = []
     for m in reversed(msgs):
         if int(m["id"]) <= int(last_msg_id or "0"):
             continue
-        if m["author"].get("bot") or m["author"]["id"] == bot_id:
+        is_bot = m["author"].get("bot") or m["author"]["id"] == bot_id
+        print(f"[DEBUG] msg id={m['id']} is_bot={is_bot} text={m.get('content','')[:30]!r}")
+        if is_bot:
             continue
         result.append(m)
+    print(f"[DEBUG] new user msgs: {len(result)}")
     return result
 
 
