@@ -266,9 +266,10 @@ def main():
         state = sm.load()
         status = state.get("status", "idle")
 
-        # 1. 뉴스 번호 선택
-        if status == "awaiting_story_selection" and text.isdigit():
-            handle_story_selection(int(text), state)
+        # 1. 뉴스 번호 선택 — "3", "1, 6", "3번" 등 다양한 형식 허용
+        _num_m = re.search(r'\d+', text)
+        if status == "awaiting_story_selection" and _num_m:
+            handle_story_selection(int(_num_m.group()), state)
             state = sm.load()
 
         # 2. 사진 확인 (OK / 다시 / N번 바꿔)
