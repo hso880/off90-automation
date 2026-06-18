@@ -1,5 +1,5 @@
 {
-  "status": "awaiting_story_selection",
+  "status": "searching",
   "news_list": {
     "1": [
       "worldcup",
@@ -74,5 +74,5 @@
       }
     ]
   },
-  "last_message_id": "1517176878996262922"
+  "last_message_id": "1517177848824074320"
 }
