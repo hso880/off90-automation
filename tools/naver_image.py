@@ -1,9 +1,11 @@
 import os
 import requests
 
-CLIENT_ID     = os.environ["NAVER_CLIENT_ID"]
-CLIENT_SECRET = os.environ["NAVER_CLIENT_SECRET"]
-HEADERS = {"X-Naver-Client-Id": CLIENT_ID, "X-Naver-Client-Secret": CLIENT_SECRET}
+def _get_headers():
+    return {
+        "X-Naver-Client-Id": os.environ["NAVER_CLIENT_ID"],
+        "X-Naver-Client-Secret": os.environ["NAVER_CLIENT_SECRET"],
+    }
 IMG_EXTS = (".jpg", ".jpeg", ".png", ".webp")
 
 KEY_PLAYERS = {
@@ -22,7 +24,7 @@ def search_images(query: str, count: int = 3) -> list:
     try:
         r = requests.get(
             "https://openapi.naver.com/v1/search/image.json",
-            headers=HEADERS,
+            headers=_get_headers(),
             params={"query": query, "display": min(count + 4, 10),
                     "sort": "sim", "filter": "large"},
             timeout=10,
