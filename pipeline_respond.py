@@ -8,7 +8,7 @@ Discord 폴링 응답기 (5분마다 실행)
   awaiting_photo_confirm   → (N번 바꿔) → awaiting_photo_confirm (해당 슬라이드 교체)
   awaiting_publish         → (발행해줘) → published
 """
-import os, sys, tempfile
+import os, sys, tempfile, re
 from pathlib import Path
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -147,7 +147,6 @@ def handle_photo_confirm(text: str, state: dict):
         return
 
     # 특정 슬라이드 교체: "1번 바꿔", "2번 바꿔", "3번 바꿔"
-    import re
     replace_m = re.search(r"([123])번\s*바꿔", text)
     if replace_m:
         slot = f"s{replace_m.group(1)}"
@@ -274,7 +273,6 @@ def main():
 
         # 2. 사진 확인 (OK / 다시 / N번 바꿔)
         elif status == "awaiting_photo_confirm":
-            import re
             text_lower = text.lower().strip()
             if (text_lower in ("ok", "ок", "오케이", "좋아", "이대로", "go")
                     or text_lower in ("다시", "재검색", "retry")
