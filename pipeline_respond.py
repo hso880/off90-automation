@@ -121,9 +121,7 @@ def handle_story_selection(choice: int, state: dict):
         })
     except Exception as e:
         print(f"사진 검색 오류: {e}")
-        send_message(f"⚠️ 사진 검색 중 오류 발생: {e}
-
-번호를 다시 입력해주세요.")
+        send_message(f"⚠️ 사진 검색 중 오류 발생: {e}\n\n번호를 다시 입력해주세요.")
         sm.save({**state, "status": "awaiting_story_selection"})
 
 
